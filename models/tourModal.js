@@ -52,13 +52,17 @@ const tourSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  secretTour: {
+    type: Boolean,
+    default: false,
+  },
   startDates: [Date],
   secretTour: {
     type: Boolean,
     default: false,
   },
 });
- // DOCUMENT MIDDELWARE
+// DOCUMENT MIDDELWARE
 // tourSchema.pre("save", function(next) {
 //   console.log(this);
 //   next();
@@ -69,9 +73,15 @@ const tourSchema = new mongoose.Schema({
 // });
 
 // QUERY MIDDELWARE
-tourSchema.pre('find', function(n){
-  this.find({})
-})
+tourSchema.pre("find", function(n) {
+  this.find({ secretTour: { $ne: true } });
+  this.shh = "ssss";
+  n();
+});
+tourSchema.post("find", function(doc, n) {
+  console.log(doc);
+  n();
+});
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
