@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/v1/tours", tourRouter);
 app.use("/", viewRouter);
 
-// handlong unhandled routes
+// handlong unhandled routes  
 app.all("*", (req, res, next) => {
   next(new AppError(`this path ${req.originalUrl} is not found.`));
 });
