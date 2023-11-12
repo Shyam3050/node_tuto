@@ -22,10 +22,7 @@ app.set("views", path.join(__dirname, "views"));
 // serving Static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// 1) MIDDLEWARES
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
+
 //Router
 app.use("/api/v1/tours", tourRouter);
 app.use("/", viewRouter);
