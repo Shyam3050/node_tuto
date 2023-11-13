@@ -1,5 +1,11 @@
 const AppError = require("../utils/appError");
 
+function handleDupFieldsDB(err) {
+  const errMsg = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  const message = `Duplicate field value ${errMsg} please use another name`;
+  return new AppError(message, 400)
+}
+
 function handelCastErrDB(err) {
   const message = `invalid ${err.path} and value ${err.value}`;
   return new AppError(message, 400);
@@ -35,6 +41,7 @@ module.exports = (err, req, res, next) => {
   } else if (process.env.NODE_ENV === "production") {
     let error = { ...err };
     if (error.name === "CastError") error = handelCastErrDB(error);
+    if (error.code === 11000) error = handleDupFieldsDB(error);
     sendErrPrd(error, res);
   }
 
