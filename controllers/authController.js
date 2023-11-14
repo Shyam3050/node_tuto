@@ -1,17 +1,21 @@
 const User = require("../models/userModal");
+const catchAsync = require("../utils/catchAsync");
+const jwt = require("jsonwebtoken");
 
+exports.saveUser = catchAsync(async (req, res) => {
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+  });
 
-exports.saveUser = async (req, res) => {
-  try {
-    const newUser = await User.create(req.body);
-    res.status(200).json({
-      status: "success",
-      data: newUser,
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+  const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXP,
+  });
+  res.status(201).json({
+    status: "success",
+    token,
+    data: newUser,
+  });
+});
