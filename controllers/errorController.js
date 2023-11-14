@@ -39,6 +39,7 @@ function sendErrPrd(err, res) {
   }
 }
 module.exports = (err, req, res, next) => {
+  console.log(err);
   err.statusCode = err.statusCode || 500;
   err.status = err.static || "error";
   if (process.env.NODE_ENV === "development") {
@@ -46,6 +47,7 @@ module.exports = (err, req, res, next) => {
   } else if (process.env.NODE_ENV === "production") {
     let error = { ...err };
     console.log(err);
+    console.log(typeof err);
     console.log(error);
     if (error.name === "CastError") error = handelCastErrDB(error);
     if (error.code === 11000) error = handleDupFieldsDB(error);

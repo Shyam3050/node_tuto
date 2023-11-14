@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const AppError = require("./utils/appError");
 const globlErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRouter");
+const userRouter = require("./routes/userRouter");
 const viewRouter = require("./routes/viewRouter");
 
 const app = express();
@@ -22,14 +23,14 @@ app.set("views", path.join(__dirname, "views"));
 // serving Static files
 app.use(express.static(path.join(__dirname, "public")));
 
-
 //Router
 app.use("/api/v1/tours", tourRouter);
+app.use("/api/v1/users", userRouter);
 app.use("/", viewRouter);
 
-// handlong unhandled routes  
+// handlong unhandled routes
 app.all("*", (req, res, next) => {
-  next(new AppError(`this path ${req.originalUrl} is not found.`));
+  next(new AppError(`this path ${req.originalUrl} is not found.`,400));
 });
 
 app.use(globlErrorHandler);
