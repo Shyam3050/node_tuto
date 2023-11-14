@@ -25,7 +25,7 @@ function sendErrDev(err, res) {
   });
 }
 function sendErrPrd(err, res) {
-  // console.log(err);
+  console.log(err);
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
@@ -46,9 +46,6 @@ module.exports = (err, req, res, next) => {
     sendErrDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
     let error = { ...err };
-    console.log(err);
-    console.log(typeof err);
-    console.log(error);
     if (error.name === "CastError") error = handelCastErrDB(error);
     if (error.code === 11000) error = handleDupFieldsDB(error);
     if(error.name === "ValidationError") error = handleValidationError(error)

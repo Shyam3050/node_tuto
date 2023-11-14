@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+userSchema.methods.correctPassword = async (currentPassword, userPassword) => {
+return bcrypt.compare(currentPassword, userPassword)
+}
+
 userSchema.pre("save", async function(next) {
   if (!this.isModified("password")) return next();
 
