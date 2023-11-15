@@ -6,10 +6,15 @@ function handleDupFieldsDB(err) {
   return new AppError(message, 400);
 }
 
-function handleValidationError(err){
-  const errors = Object.values(err.errors).map(el => el.message)
- const message = `Invalid input data ${errors.join(", ")}`
- return new AppError(message, 500)
+const handleJwtError = () =>
+  new AppError("invalid token please login again", 401);
+const handleTokenExp = () =>
+  new AppError("Token was expired please login", 401);
+
+function handleValidationError(err) {
+  const errors = Object.values(err.errors).map((el) => el.message);
+  const message = `Invalid input data ${errors.join(", ")}`;
+  return new AppError(message, 500);
 }
 function handelCastErrDB(err) {
   const message = `invalid ${err.path} and value ${err.value}`;
@@ -48,7 +53,10 @@ module.exports = (err, req, res, next) => {
     let error = { ...err };
     if (error.name === "CastError") error = handelCastErrDB(error);
     if (error.code === 11000) error = handleDupFieldsDB(error);
-    if(error.name === "ValidationError") error = handleValidationError(error)
+    if (error.name === "ValidationError") error = handleValidationError(error);
+    if (error.name === "JsonWebTokenError") error = handleJwtError(error);
+    if (error.name === "TokenExpiredError") error = handleTokenExp(error);
+
     sendErrPrd(error, res);
   }
 
