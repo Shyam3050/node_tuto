@@ -3,8 +3,8 @@ const catchAsync = require("../utils/catchAsync");
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/appError");
 
-function signToken(id){
-  return jwt.sign({ id}, process.env.JWT_SECRET, {
+function signToken(id) {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXP,
   });
 }
@@ -17,7 +17,7 @@ exports.saveUser = catchAsync(async (req, res) => {
     confirmPassword: req.body.confirmPassword,
   });
 
-  const token =  signToken(newUser._id)
+  const token = signToken(newUser._id);
   res.status(201).json({
     status: "success",
     token,
@@ -30,10 +30,10 @@ exports.login = async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError("please provide password, email", 404));
   }
-  const user = await User.findOne({email}).select('+password');
+  const user = await User.findOne({ email }).select("+password");
   console.log(user);
-  if(!user || !(await user.correctPassword(password,user.password))){
-    return next(new AppError('incorrect email and password', 401))
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError("incorrect email and password", 401));
   }
   const token = signToken(user._id);
   res.status(200).json({
@@ -41,3 +41,21 @@ exports.login = async (req, res, next) => {
     token,
   });
 };
+
+exports.protect = catchAsync(async (req, res, next) => {
+  // getting token check of it's there
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return next(
+      new AppError("you are not loggedin please login to access", 401)
+    );
+  }
+  next()
+});
