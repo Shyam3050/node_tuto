@@ -11,12 +11,15 @@ function signToken(id) {
 }
 
 exports.saveUser = catchAsync(async (req, res) => {
+  console.log(req.body.role);
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
+    role: req.body.role,
   });
+  console.log(newUser);
 
   const token = signToken(newUser._id);
   res.status(201).json({
@@ -66,9 +69,17 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (!currentUser) {
     next(new AppError("User no longer exists", 401));
   }
-  // check if user changed password after the token was expired
 
   //grant access to protected route
   req.user = currentUser;
   next();
 });
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError("you dont have access it", 403));
+    }
+    next();
+  };
+};
