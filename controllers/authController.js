@@ -75,7 +75,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // check if user changed password after token was issued.
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError('User recently changed password! Please log in again.', 401)
+      new AppError("User recently changed password! Please log in again.", 401)
     );
   }
   //grant access to protected route
@@ -157,6 +157,29 @@ exports.resetPassword = async (req, res, next) => {
   const token = signToken(user._id);
   res.status(200).json({
     status: "success",
-     token,
+    token,
   });
 };
+
+exports.updatepassword = catchAsync(async (req, res, next) => {
+  // get user from collection
+  console.log(req.user);
+  const user = await User.findById(req.user.id).select("+password");
+  console.log(user);
+  // check if posted current password is correct
+  if (! await user.correctPassword(req.body.currentPassword, user.password)) {
+    return next(new AppError("Your current password is wrong.", 401));
+  }
+  // update password
+  user.password = req.body.updatePassword;
+  user.confirmPassword = req.body.confirmUpdatePassword;
+  await user.save();
+  // User.findByIdAndUpdate will NOT work as intended!
+
+  // log user in send JWT
+  const token = signToken(user._id);
+  res.status(200).json({
+    status: "success",
+    token,
+  });
+});
