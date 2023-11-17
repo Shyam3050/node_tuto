@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const { promisify } = require("util");
 const User = require("../models/userModal");
 const catchAsync = require("../utils/catchAsync");
@@ -62,7 +63,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       new AppError("you are not loggedin please login to access", 401)
     );
   }
-  //verufucation token
+  //verufication token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   // if user still exists
@@ -71,6 +72,12 @@ exports.protect = catchAsync(async (req, res, next) => {
     next(new AppError("User no longer exists", 401));
   }
 
+  // check if user changed password after token was issued.
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password! Please log in again.', 401)
+    );
+  }
   //grant access to protected route
   req.user = currentUser;
   next();
@@ -114,10 +121,42 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   } catch (err) {
     user.passwordResetToken = undefined;
     user.passwordResetExp = undefined;
-    user.save({validateBeforeSave: false})
-    return next(new AppError("there was some problem try again"),500)
+    user.save({ validateBeforeSave: false });
+    return next(new AppError("there was some problem try again"), 500);
   }
   next();
 });
 
-exports.resetPassword = (req, res, next) => {};
+exports.resetPassword = async (req, res, next) => {
+  // get user based on token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExp: {
+      $gt: Date.now(),
+    },
+  });
+
+  // if token has not expired and there is user set the new password
+  if (!user) {
+    return next(new AppError("token is invalid expired", 400));
+  }
+
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExp = undefined;
+  await user.save();
+  // update the changed password at property
+
+  // log the user and send jwt
+
+  const token = signToken(user._id);
+  res.status(200).json({
+    status: "success",
+     token,
+  });
+};
