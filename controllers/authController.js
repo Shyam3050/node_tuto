@@ -12,8 +12,30 @@ function signToken(id) {
   });
 }
 
+function createSendToken(user, statusCode, res) {
+  const token = signToken(user.id);
+  const cookieOPT = {
+    expires: new Date(
+      Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV === "production") cookieOPT.secure = true;
+
+  user.password = undefined;
+
+  res.cookie("jwt", token, cookieOPT);
+
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: {
+      user,
+    },
+  });
+}
+
 exports.saveUser = catchAsync(async (req, res) => {
-  console.log(req.body.role);
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
@@ -21,7 +43,6 @@ exports.saveUser = catchAsync(async (req, res) => {
     confirmPassword: req.body.confirmPassword,
     role: req.body.role,
   });
-  console.log(newUser);
 
   const token = signToken(newUser._id);
   res.status(201).json({
@@ -41,11 +62,7 @@ exports.login = async (req, res, next) => {
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("incorrect email and password", 401));
   }
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: "success",
-    token,
-  });
+  createSendToken(user, 200, res);
 };
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -167,7 +184,7 @@ exports.updatepassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
   console.log(user);
   // check if posted current password is correct
-  if (! await user.correctPassword(req.body.currentPassword, user.password)) {
+  if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
     return next(new AppError("Your current password is wrong.", 401));
   }
   // update password
