@@ -20,7 +20,16 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.update = catchAsync( async(req, res, next) => {
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user.id, { active: false });
+
+  res.status(200).json({
+    status: "success",
+    message: "deleted successfully",
+  });
+});
+
+exports.updateMe = catchAsync(async (req, res, next) => {
   // if users post password then push error
   if (req.body.password || req.body.confirmPassword) {
     return next(
@@ -39,6 +48,6 @@ exports.update = catchAsync( async(req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    data: updatedUser
+    data: updatedUser,
   });
-})
+});
