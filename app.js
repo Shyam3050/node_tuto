@@ -7,7 +7,9 @@ const tourRouter = require("./routes/tourRouter");
 const userRouter = require("./routes/userRouter");
 const viewRouter = require("./routes/viewRouter");
 const rateLimit = require("express-rate-limit");
-const helmet = require("helmet")
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
 
 const app = express();
 
@@ -17,7 +19,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // set security http header
-app.use(helmet())
+app.use(helmet());
 
 //rate limit
 const limiter = rateLimit({
@@ -28,14 +30,21 @@ const limiter = rateLimit({
 app.use("/api", limiter);
 
 // body parcer reading data from body into req.body
-app.use(express.json());
+app.use(express.json({
+  limit:"10kb"
+}));
+// Data sanitization aginist  NoSql injection
+
+app.use(mongoSanitize());
+// Data sanitization against xss
+app.use(xss());
+
 // serving Static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // pug
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
-
 
 //Router
 app.use("/api/v1/tours", tourRouter);
