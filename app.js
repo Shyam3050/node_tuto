@@ -7,6 +7,7 @@ const tourRouter = require("./routes/tourRouter");
 const userRouter = require("./routes/userRouter");
 const viewRouter = require("./routes/viewRouter");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet")
 
 const app = express();
 
@@ -14,6 +15,9 @@ const app = express();
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+
+// set security http header
+app.use(helmet())
 
 //rate limit
 const limiter = rateLimit({
@@ -23,14 +27,15 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
+// body parcer reading data from body into req.body
 app.use(express.json());
+// serving Static files
+app.use(express.static(path.join(__dirname, "public")));
 
 // pug
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
-// serving Static files
-app.use(express.static(path.join(__dirname, "public")));
 
 //Router
 app.use("/api/v1/tours", tourRouter);
