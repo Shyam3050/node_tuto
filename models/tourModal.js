@@ -19,9 +19,9 @@ const tourSchema = new mongoose.Schema({
     type: String,
     required: [true, "A tour must have a difficulty"],
     enum: {
-      values: ['easy', 'medium', 'difficult'],
-      message: 'Difficulty is either: easy, medium, difficult'
-    }
+      values: ["easy", "medium", "difficult"],
+      message: "Difficulty is either: easy, medium, difficult",
+    },
   },
   ratingsAverage: {
     type: Number,
@@ -65,6 +65,29 @@ const tourSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  startLocation: {
+    type: {
+      type: String,
+      default: "point",
+      enum: ["point"],
+    },
+    coordinates: [Number],
+    address: String,
+    description: String,
+  },
+  location: [
+    {
+      type: {
+        type: String,
+        default: "point",
+        enum: ["point"],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+      day: Number
+    },
+  ],
 });
 // DOCUMENT MIDDELWARE
 // tourSchema.pre("save", function(next) {
