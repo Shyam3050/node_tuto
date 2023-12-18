@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const User = require("./userModal");
+// const User = require("./userModal");
 
 const tourSchema = new mongoose.Schema({
   name: {
@@ -77,7 +77,7 @@ const tourSchema = new mongoose.Schema({
     address: String,
     description: String,
   },
-  location: [
+  locations: [
     {
       type: {
         type: String,
@@ -108,6 +108,14 @@ const tourSchema = new mongoose.Schema({
 //    this.guides = await Promise.all(guidesPromises)
 //   next()
 // })
+
+tourSchema.pre(/^find/, function(next){
+  this.populate({
+    path: "guides",
+    select: "-__v"
+  })
+  next()
+})
 
 // QUERY MIDDELWARE
 tourSchema.pre("find", function(n) {
