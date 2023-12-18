@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const User = require("./userModal")
+const User = require("./userModal");
 
 const tourSchema = new mongoose.Schema({
   name: {
@@ -70,8 +70,8 @@ const tourSchema = new mongoose.Schema({
   startLocation: {
     type: {
       type: String,
-      default: "point",
-      enum: ["point"],
+      default: "Point",
+      enum: ["Point"],
     },
     coordinates: [Number],
     address: String,
@@ -81,16 +81,16 @@ const tourSchema = new mongoose.Schema({
     {
       type: {
         type: String,
-        default: "point",
-        enum: ["point"],
+        default: "Point",
+        enum: ["Point"],
       },
       coordinates: [Number],
       address: String,
       description: String,
-      day: Number
+      day: Number,
     },
   ],
-  guides: Array
+  guides: [{ type: mongoose.ObjectId, ref: "User" }],
 });
 // DOCUMENT MIDDELWARE
 // tourSchema.pre("save", function(next) {
@@ -102,11 +102,12 @@ const tourSchema = new mongoose.Schema({
 //   next();
 // });
 
-tourSchema.pre("save", async function(next){
-  const guidesPromises = this.guides.map(async id => await User.findById(id))
-   this.guides = await Promise.all(guidesPromises)
-  next()
-})
+// modeling tour guides embeding
+// tourSchema.pre("save", async function(next){
+//   const guidesPromises = this.guides.map(async id => await User.findById(id))
+//    this.guides = await Promise.all(guidesPromises)
+//   next()
+// })
 
 // QUERY MIDDELWARE
 tourSchema.pre("find", function(n) {
