@@ -30,6 +30,17 @@ const reviewModalSchema = mongoose.Schema({
   ],
 });
 
+reviewModalSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: "user",
+    select: "name",
+  }).populate({
+    path: "tour",
+    select: "-guides name",
+  });
+  next();
+});
+
 const Review = mongoose.model("Review", reviewModalSchema);
 
 module.exports = Review;
