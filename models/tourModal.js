@@ -2,83 +2,73 @@ const mongoose = require("mongoose");
 
 // const User = require("./userModal");
 
-const tourSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "A tour must have a name"],
-    unique: true,
-    trim: true,
-  },
-  duration: {
-    type: Number,
-    required: [true, "A tour must have a duration"],
-  },
-  maxGroupSize: {
-    type: Number,
-    required: [true, "A tour must have a group size"],
-  },
-  difficulty: {
-    type: String,
-    required: [true, "A tour must have a difficulty"],
-    enum: {
-      values: ["easy", "medium", "difficult"],
-      message: "Difficulty is either: easy, medium, difficult",
-    },
-  },
-  ratingsAverage: {
-    type: Number,
-    default: 4.5,
-  },
-  ratingsQuantity: {
-    type: Number,
-    default: 0,
-  },
-  price: {
-    type: Number,
-    required: [true, "A tour must have a price"],
-  },
-  priceDiscount: {
-    type: Number,
-  },
-  summary: {
-    type: String,
-    trim: true,
-    required: [true, "A tour must have a description"],
-  },
-  description: {
-    type: String,
-    trim: true,
-  },
-  imageCover: {
-    type: String,
-    required: [true, "A tour must have a cover image"],
-  },
-  images: [String],
-  createdAt: {
-    type: Date,
-    default: Date.now(),
-  },
-  secretTour: {
-    type: Boolean,
-    default: false,
-  },
-  startDates: [Date],
-  secretTour: {
-    type: Boolean,
-    default: false,
-  },
-  startLocation: {
-    type: {
+const tourSchema = new mongoose.Schema(
+  {
+    name: {
       type: String,
-      default: "Point",
-      enum: ["Point"],
+      required: [true, "A tour must have a name"],
+      unique: true,
+      trim: true,
     },
-    coordinates: [Number],
-    address: String,
-    description: String,
-  },
-  locations: [
-    {
+    duration: {
+      type: Number,
+      required: [true, "A tour must have a duration"],
+    },
+    maxGroupSize: {
+      type: Number,
+      required: [true, "A tour must have a group size"],
+    },
+    difficulty: {
+      type: String,
+      required: [true, "A tour must have a difficulty"],
+      enum: {
+        values: ["easy", "medium", "difficult"],
+        message: "Difficulty is either: easy, medium, difficult",
+      },
+    },
+    ratingsAverage: {
+      type: Number,
+      default: 4.5,
+    },
+    ratingsQuantity: {
+      type: Number,
+      default: 0,
+    },
+    price: {
+      type: Number,
+      required: [true, "A tour must have a price"],
+    },
+    priceDiscount: {
+      type: Number,
+    },
+    summary: {
+      type: String,
+      trim: true,
+      required: [true, "A tour must have a description"],
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    imageCover: {
+      type: String,
+      required: [true, "A tour must have a cover image"],
+    },
+    images: [String],
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+    },
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
+    startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
+    startLocation: {
       type: {
         type: String,
         default: "Point",
@@ -87,11 +77,27 @@ const tourSchema = new mongoose.Schema({
       coordinates: [Number],
       address: String,
       description: String,
-      day: Number,
     },
-  ],
-  guides: [{ type: mongoose.ObjectId, ref: "User" }],
-});
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [{ type: mongoose.ObjectId, ref: "User" }],
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 // DOCUMENT MIDDELWARE
 // tourSchema.pre("save", function(next) {
 //   console.log(this);
@@ -109,13 +115,20 @@ const tourSchema = new mongoose.Schema({
 //   next()
 // })
 
-tourSchema.pre(/^find/, function(next){
+tourSchema.pre(/^find/, function(next) {
   this.populate({
     path: "guides",
-    select: "-__v"
-  })
-  next()
-})
+    select: "-__v",
+  });
+  next();
+});
+
+// Virtual populate
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
+});
 
 // QUERY MIDDELWARE
 tourSchema.pre("find", function(n) {
@@ -127,6 +140,7 @@ tourSchema.post("find", function(doc, n) {
   console.log(doc);
   n();
 });
+
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
