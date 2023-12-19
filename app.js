@@ -6,6 +6,7 @@ const globlErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRouter");
 const userRouter = require("./routes/userRouter");
 const viewRouter = require("./routes/viewRouter");
+const reviewRouter = require("./routes/reviewRouter");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -30,9 +31,11 @@ const limiter = rateLimit({
 app.use("/api", limiter);
 
 // body parcer reading data from body into req.body
-app.use(express.json({
-  limit:"10kb"
-}));
+app.use(
+  express.json({
+    limit: "10kb",
+  })
+);
 // Data sanitization aginist  NoSql injection
 
 app.use(mongoSanitize());
@@ -49,6 +52,7 @@ app.set("views", path.join(__dirname, "views"));
 //Router
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 app.use("/", viewRouter);
 
 // handlong unhandled routes
