@@ -8,17 +8,23 @@ router.route("/signup").post(authController.saveUser);
 router.route("/login").post(authController.login);
 router.route("/forgotpassword").post(authController.forgotPassword);
 router.route("/resetpassword/:token").patch(authController.resetPassword);
+ 
+router.use(authController.protect)
+
 router
   .route("/updatepassword")
-  .patch(authController.protect, authController.updatepassword);
+  .patch( authController.updatepassword);
 router
   .route("/updateme")
-  .patch(authController.protect, userController.updateMe);
+  .patch( userController.updateMe);
 router
   .route("/deleteme")
-  .delete(authController.protect, userController.deleteMe);
+  .delete( userController.deleteMe);
 router
   .route("/me")
-  .get(authController.protect, userController.getMe, userController.getUser);
+  .get( userController.getMe, userController.getUser);
+
+
+  router.route("/").get()
 
 module.exports = router;

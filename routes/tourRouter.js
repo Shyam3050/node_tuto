@@ -14,13 +14,14 @@ router
 
 router
   .route("/")
-  .get(protect, tourController.getAllTour)
-  .post( tourController.createTour);
+  .get( tourController.getAllTour)
+  .post(protect, restrictTo("admin", "lead-guide"), tourController.createTour);
 
 router
   .route("/:id")
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
+  .patch( protect,
+    restrictTo("admin", "lead-guide"),tourController.updateTour)
   .delete(
     protect,
     restrictTo("admin", "lead-guide"),
