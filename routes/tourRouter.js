@@ -15,7 +15,7 @@ router
 router
   .route("/")
   .get(protect, tourController.getAllTour)
-  .post(tourController.createTour);
+  .post( tourController.createTour);
 
 router
   .route("/:id")

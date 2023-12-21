@@ -1,6 +1,7 @@
 const User = require("../models/userModal");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
+const { getOne } = require("./handlerFactory");
 
 const filteredObj = (body, ...allowFields) => {
   const newObj = {};
@@ -9,6 +10,10 @@ const filteredObj = (body, ...allowFields) => {
   });
   return newObj;
 };
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next()
+}
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.find();
@@ -51,3 +56,5 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     data: updatedUser,
   });
 });
+
+exports.getUser = getOne(User)
