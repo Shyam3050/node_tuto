@@ -14,7 +14,11 @@ router.use(authController.protect);
 router.route("/updatepassword").patch(authController.updatepassword);
 router
   .route("/updateme")
-  .patch(userController.uploadPhoto, userController.updateMe);
+  .patch(
+    userController.uploadPhoto,
+    userController.resizeUserPhoto,
+    userController.updateMe
+  );
 router.route("/deleteme").delete(userController.deleteMe);
 router.route("/me").get(userController.getMe, userController.getUser);
 
