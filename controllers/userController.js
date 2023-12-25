@@ -2,6 +2,30 @@ const User = require("../models/userModal");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const { getOne } = require("./handlerFactory");
+const multer = require("multer");
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/img/users");
+  },
+  filename: (req, file, cb) => {
+    const ext = file.mimetype.split("/")[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+  },
+});
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new AppError("not a image please upload only image", 400), false);
+  }
+};
+const upload = multer({
+  fileFilter: multerFilter,
+  storage: multerStorage,
+});
+exports.uploadPhoto = upload.single("photo");
 
 const filteredObj = (body, ...allowFields) => {
   const newObj = {};
@@ -12,8 +36,8 @@ const filteredObj = (body, ...allowFields) => {
 };
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
-  next()
-}
+  next();
+};
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.find();
@@ -59,4 +83,4 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getUser = getOne(User)
+exports.getUser = getOne(User);
