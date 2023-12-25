@@ -71,7 +71,10 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     );
   }
   // update password
+  // filter unwanted fields
   const filteredField = filteredObj(req.body, "name", "email");
+  if (req.file) filteredField.photo = req.file.filename;
+
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredField, {
     new: true,
     runValidators: true,
